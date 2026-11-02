@@ -3,6 +3,28 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node server/index.js", "dev": "node --watch server/index.js" },
-  "engines": { "node": ">=20" }
+  "scripts": {
+    "build": "esbuild src/ston-swap.js --bundle --format=esm --platform=browser --outfile=dist/ston-swap.js",
+    "prestart": "npm run build",
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "npm run build && node --env-file-if-exists=.env --watch server/index.js",
+    "deploy:pool": "node --env-file-if-exists=.env scripts/deploy-pool.js",
+    "operator": "node --env-file-if-exists=.env scripts/operator.js"
+  },
+  "dependencies": {
+    "@ston-fi/omniston-sdk": "0.8.12",
+    "@ton/core": "0.63.1",
+    "@tonconnect/ui": "5.0.1",
+    "ethers": "^6.17.0",
+    "solc": "^0.8.36"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=20.6"
+  },
+  "overrides": {
+    "tmp": "0.2.7"
+  }
 }

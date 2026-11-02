@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tonbet
+      POSTGRES_USER: tonbet
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deployment environment}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tonbet -d tonbet"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://tonbet:${POSTGRES_PASSWORD}@postgres:5432/tonbet?schema=public
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?Set FRONTEND_ORIGIN}
+      PUBLIC_URL: ${PUBLIC_URL:?Set PUBLIC_URL}
+      TON_NETWORK: ${TON_NETWORK:-mainnet}
+      TONCENTER_URL: ${TONCENTER_URL:-https://toncenter.com/api/v2}
+      TONCENTER_API_KEY: ${TONCENTER_API_KEY:-}
+      ESCROW_CONTRACT_ADDRESS: ${ESCROW_CONTRACT_ADDRESS:-}
+      ADMIN_WALLET_ADDRESS: ${ADMIN_WALLET_ADDRESS:-}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?Set ADMIN_API_TOKEN}
+      MIN_RESERVE_TON: ${MIN_RESERVE_TON:-10}
+      ODDS_REFRESH_SECONDS: ${ODDS_REFRESH_SECONDS:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-c", "npx prisma db push --schema prisma/schema.postgres.prisma && node src/index.js"]
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      - backend
+volumes:
+  pgdata:

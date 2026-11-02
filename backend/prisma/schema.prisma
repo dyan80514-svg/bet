@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String        @id @default(cuid())
+  walletAddress  String        @unique
+  kycStatus      String        @default("unverified")
+  ageVerified    Boolean       @default(false)
+  selfExcludedAt DateTime?
+  depositLimit   String?
+  bets           Bet[]
+  transactions   Transaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Game {
+  id           String   @id
+  sourceId     String
+  source       String
+  sport        String
+  league       String
+  homeTeam     String
+  awayTeam     String
+  commenceTime DateTime
+  status       String   @default("upcoming")
+  oddsJson     String
+  marketOpen   Boolean  @default(false)
+  postedOddsJson String?
+  marketCloseTime DateTime?
+  result        String?
+  lastUpdate   DateTime
+  bets         Bet[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([source, sourceId])
+  @@index([commenceTime, status])
+}
+
+model Bet {
+  id            String   @id @default(cuid())
+  walletAddress String
+  user          User     @relation(fields: [walletAddress], references: [walletAddress])
+  gameId        String
+  game          Game     @relation(fields: [gameId], references: [id])
+  selection     String
+  decimalOdds   String
+  stakeNano     String
+  potentialNano String
+  chainBetId    String   @unique
+  txHash        String   @unique
+  status        String   @default("pending")
+  resultTxHash  String?
+  settledAt     DateTime?
+  createdAt     DateTime @default(now())
+  @@index([walletAddress, createdAt])
+  @@index([status, gameId])
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  walletAddress String
+  user          User     @relation(fields: [walletAddress], references: [walletAddress])
+  txHash        String   @unique
+  kind          String
+  amountNano    String
+  status        String   @default("confirmed")
+  createdAt     DateTime @default(now())
+}
+
+model AppSettings {
+  key        String   @id
+  value      String
+  updatedAt  DateTime @updatedAt
+}
+
+model Reserve {
+  id              String   @id @default("ton-mainnet")
+  contractAddress String?
+  balanceNano     String   @default("0")
+  liabilitiesNano String   @default("0")
+  minimumNano     String   @default("0")
+  funded          Boolean  @default(false)
+  checkedAt       DateTime?
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actor       String
+  action      String
+  subject     String?
+  metadata    String?
+  createdAt   DateTime @default(now())
+}

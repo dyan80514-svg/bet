@@ -1,0 +1,33 @@
+{
+  "name": "@all-in-one-ton-betting/backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "fetch:odds": "node src/cli/fetch-odds.js",
+    "check:reserve": "node src/cli/check-reserve.js",
+    "compile:contract": "tolk-js --output-fift contracts/BettingPool.fif contracts/BettingPool.tolk"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "@ton/core": "^0.63.1",
+    "@ton/ton": "^16.2.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@ton/tolk-js": "^1.5.0",
+    "prisma": "^6.19.0"
+  }
+}

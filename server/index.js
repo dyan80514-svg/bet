@@ -1,6 +1,6 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -35,7 +35,8 @@ http.createServer(async (req,res) => {
     }
     const path = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
     const safePath = normalize(join(root, path));
-    if (!safePath.startsWith(root)) throw Object.assign(new Error('Not found'), {status:404});
+    const relPath = relative(root, safePath);
+    if (isAbsolute(relPath) || relPath === '..' || relPath.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`)) throw Object.assign(new Error('Not found'), {status:404});
     const body = await readFile(safePath);
     res.writeHead(200,{...headers,'Content-Type':mime[extname(safePath)] || 'application/octet-stream'}); res.end(body);
   } catch (error) {

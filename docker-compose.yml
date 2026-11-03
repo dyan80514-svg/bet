@@ -13,6 +13,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+
   backend:
     build:
       context: .
@@ -24,18 +25,21 @@ services:
       DATABASE_URL: postgresql://tonbet:${POSTGRES_PASSWORD}@postgres:5432/tonbet?schema=public
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?Set FRONTEND_ORIGIN}
       PUBLIC_URL: ${PUBLIC_URL:?Set PUBLIC_URL}
-      TON_NETWORK: ${TON_NETWORK:-mainnet}
-      TONCENTER_URL: ${TONCENTER_URL:-https://toncenter.com/api/v2}
-      TONCENTER_API_KEY: ${TONCENTER_API_KEY:-}
-      ESCROW_CONTRACT_ADDRESS: ${ESCROW_CONTRACT_ADDRESS:-}
-      ADMIN_WALLET_ADDRESS: ${ADMIN_WALLET_ADDRESS:-}
+      TON_NETWORK: mainnet
+      TON_API_URL: ${TON_API_URL:-https://toncenter.com/api/v2/jsonRPC}
+      TONCENTER_MAINNET_API_KEY: ${TONCENTER_MAINNET_API_KEY:-}
+      ESCROW_CONTRACT_ADDRESS: ${ESCROW_CONTRACT_ADDRESS:?Set ESCROW_CONTRACT_ADDRESS}
+      ADMIN_MAINNET_WALLET: ${ADMIN_MAINNET_WALLET:?Set ADMIN_MAINNET_WALLET}
       ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?Set ADMIN_API_TOKEN}
-      MIN_RESERVE_TON: ${MIN_RESERVE_TON:-10}
-      ODDS_REFRESH_SECONDS: ${ODDS_REFRESH_SECONDS:-30}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      STONFI_ROUTER_ADDRESS: ${STONFI_ROUTER_ADDRESS:-EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt}
+      MIN_RESERVE_TON: ${MIN_RESERVE_TON:-50}
+      ODDS_REFRESH_SECONDS: ${ODDS_REFRESH_SECONDS:-15}
     depends_on:
       postgres:
         condition: service_healthy
     command: ["sh", "-c", "npx prisma db push --schema prisma/schema.postgres.prisma && node src/index.js"]
+
   frontend:
     build:
       context: .
@@ -45,5 +49,6 @@ services:
       - "${HTTP_PORT:-8080}:80"
     depends_on:
       - backend
+
 volumes:
   pgdata:

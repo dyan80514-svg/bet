@@ -15,7 +15,9 @@
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@ton/core": "^0.63.1",
-    "@ton/ton": "^16.2.0",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^16.3.0",
+    "axios": "^1.21.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
